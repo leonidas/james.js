@@ -3,7 +3,7 @@
 James.js is a composable build tool which prefers code over configuration.
 
 ```coffeescript
-// Jamesfile.coffee
+# Jamesfile.coffee
 {files, write} = require './src/james'
 coffee = require 'james-coffee'
 concat = require 'james-concat'
