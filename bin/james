@@ -1,0 +1,11 @@
+#!/usr/bin/env node
+
+'use strict';
+
+var coffee          = require('james-coffee'),
+    james           = require('../index.js'),
+    JamesfileJs     = james.files('./Jamesfile.js'),
+    JamesfileCoffee = james.files('./Jamesfile.coffee');
+
+JamesfileJs.onValue(james.execute);
+JamesfileCoffee.map(coffee).onValue(james.execute);

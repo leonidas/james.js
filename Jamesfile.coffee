@@ -1,4 +1,4 @@
-{files, write} = require './src/james'
+{files, write} = require './index'
 coffee = require 'james-coffee'
 concat = require 'james-concat'
 

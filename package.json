@@ -1,6 +1,6 @@
 {
   "name": "james",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "James is a composable build tool which prefers code over configuration.",
   "main": "index.js",
   "scripts": {
@@ -23,8 +23,9 @@
     "gaze": "~0.3.3",
     "mkdirp": "~0.3.5"
   },
+  "preferGlobal": true,
   "devDependencies": {
     "coffee-script": "~1.6.1",
-    "james-coffee": "~0.0.0"
+    "james-coffee": "~0.0.1"
   }
 }

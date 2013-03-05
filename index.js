@@ -1,11 +1,13 @@
 (function() {
-  var Bacon, Gaze, fs, glob, mkdirp, path, watch;
+  var Bacon, Gaze, child_process, fs, glob, mkdirp, path, runner, watch;
 
   Bacon = require('baconjs').Bacon;
 
   Gaze = require('gaze').Gaze;
 
   fs = require('fs');
+
+  child_process = require('child_process');
 
   path = require('path');
 
@@ -41,6 +43,23 @@
     return files.map(function(file) {
       mkdirp.sync(path.dirname(file.name));
       return fs.writeFileSync(file.name, file.content, 'utf8');
+    });
+  };
+
+  runner = null;
+
+  exports.execute = function(files) {
+    return files.map(function(file) {
+      if (runner) {
+        console.log("Reloading Jamesfile");
+        runner.kill();
+      } else {
+        console.log("Loading Jamesfile");
+      }
+      return runner = child_process.spawn('node', ['-e', file.content], {
+        cwd: process.cwd(),
+        stdio: 'inherit'
+      });
     });
   };
 
