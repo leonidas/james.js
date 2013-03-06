@@ -7,6 +7,7 @@ James.js is a composable build tool which prefers code over configuration.
 james  = require 'james'
 coffee = require 'james-coffee'
 concat = require 'james-concat'
+uglify = require 'james-uglify'
 
 module.exports = tasks = {}
 
