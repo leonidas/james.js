@@ -6,16 +6,15 @@ var Bacon  = require('baconjs').Bacon,
     glob   = require('glob');
 
 exports.watch = function(pattern) {
-  var gazer, gazerStream;
-  gazer = new Gaze(pattern);
-  return gazerStream = Bacon.fromEventTarget(gazer, 'all', function(event, filename) {
+  var gazer = new Gaze(pattern);
+  return Bacon.fromEventTarget(gazer, 'all', function(event, filename) {
     return [
       {
         name: filename,
         content: fs.readFileSync(filename, 'utf8')
       }
     ];
-  }).toProperty(files(pattern));
+  });
 };
 
 exports.files = files = function(pattern) {
