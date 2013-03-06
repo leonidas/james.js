@@ -19,12 +19,14 @@ exports.watch = function(pattern) {
 };
 
 exports.files = files = function(pattern) {
-  return glob.sync(pattern).map(function(filename) {
+  var files = glob.sync(pattern).map(function(filename) {
     return {
       name: filename,
       content: fs.readFileSync(filename, 'utf8')
     };
   });
+
+  return Bacon.once(files);
 };
 
 exports.write = function(files) {
