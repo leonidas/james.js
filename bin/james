@@ -25,12 +25,10 @@ if (process.argv.indexOf('watch') > -1) {
     if ( runner ) {
       runner.kill();
     }
-    runner = cp.fork(__dirname + '/../lib/runner', process.argv);
+    runner = cp.fork(__dirname + '/../lib/runner', process.argv.slice(2));
   });
 
 } else {
-  console.log('execute&exit');
-  runner = cp.spawn('node',
-    [__dirname + '/../lib/runner'].concat(process.argv),
-    {stdio: 'inherit'});
+  console.log('Loading Jamesfile');
+  runner = require(__dirname + '/../lib/runner');
 }
