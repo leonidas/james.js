@@ -4,23 +4,34 @@ James.js is a composable build tool which prefers code over configuration.
 
 ```coffeescript
 # Jamesfile.coffee
-{files, write} = require './src/james'
+james  = require 'james'
 coffee = require 'james-coffee'
 concat = require 'james-concat'
 
-files('src/**/*.coffee')
-  .map(coffee)
-  .map(concat 'index.js')
-  .onValue write
+module.exports = tasks = {}
 
+tasks.build = ->
+  dist = james.files('src/**/*.coffee')
+    .map(coffee)
+    .map(concat dest: 'dist/my-lib.js')
+
+  min  = dist.map(uglify dest: 'dist/my-lib.min.js')
+
+  dist.onValue james.write
+  min.onValue  james.write
+
+# James watches also Jamesfile, if run with `james watch` \o/
+tasks.watch = ->
+  james.watch('src/**/*.coffee').onValue tasks.build
 ```
 
+Command-line:
+
 ```
-> coffee Jamesfile.coffee
+> npm install -g james
+> james build
 ```
 
 # TODO
 
-* Autoreloading runner
-* Separate watching from tasks
 * Moar plugins
