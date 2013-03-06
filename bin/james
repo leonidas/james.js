@@ -2,10 +2,35 @@
 
 'use strict';
 
-var coffee          = require('james-coffee'),
-    james           = require('../index.js'),
-    JamesfileJs     = james.files('./Jamesfile.js'),
-    JamesfileCoffee = james.files('./Jamesfile.coffee');
+var fs    = require('fs'),
+    cp    = require('child_process'),
+    james = require('../index.js'),
+    jamesfile,
+    runner;
 
-JamesfileJs.onValue(james.execute);
-JamesfileCoffee.map(coffee).onValue(james.execute);
+if (fs.existsSync('./Jamesfile.js')) {
+  jamesfile = './Jamesfile.js'
+
+} else if (fs.existsSync('./Jamesfile.coffee')) {
+  jamesfile = './Jamesfile.coffee'
+
+} else {
+  console.log("Error: Unable to find Jamesfile.")
+  process.exit(1);
+}
+
+if (process.argv.indexOf('watch') > -1) {
+  james.watch(jamesfile).toProperty(james.files(jamesfile)).onValue(function() {
+    console.log('Loading Jamesfile');
+    if ( runner ) {
+      runner.kill();
+    }
+    runner = cp.fork(__dirname + '/../lib/runner', process.argv);
+  });
+
+} else {
+  console.log('execute&exit');
+  runner = cp.spawn('node',
+    [__dirname + '/../lib/runner'].concat(process.argv),
+    {stdio: 'inherit'});
+}
