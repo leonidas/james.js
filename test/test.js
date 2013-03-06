@@ -1,5 +1,5 @@
 var assert = require('assert'),
-    james  = require('james')
+    james  = require('../index')
 
 describe('James', function(){
   describe('#files', function(){

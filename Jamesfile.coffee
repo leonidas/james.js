@@ -1,4 +1,4 @@
-{watch, files, write} = require 'james'
+james = require './index'
 
 module.exports = tasks = {}
 
