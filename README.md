@@ -1,5 +1,7 @@
 # Synopsis
 
+[![Build Status](https://travis-ci.org/leonidas/james.js.png?branch=master)](https://travis-ci.org/leonidas/james.js)
+
 James.js is a composable build tool which prefers code over configuration.
 
 ```coffeescript
