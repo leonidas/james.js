@@ -1,7 +1,6 @@
-{watch, files, write} = require './index'
-coffee = require 'james-coffee'
-concat = require 'james-concat'
+{watch, files, write} = require 'james'
 
 module.exports = tasks = {}
 
-tasks.default = -> console.log "Hello from 'default'!"
+tasks.default = -> console.log('Hello from "default!"');
+
