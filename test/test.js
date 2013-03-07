@@ -1,5 +1,6 @@
 var assert = require('assert'),
-    fs     = require('fs')
+    fs     = require('fs'),
+    path   = require('path'),
     james  = require('../index'),
     Bacon  = require('baconjs').Bacon
 
@@ -22,23 +23,22 @@ describe('james', function(){
     })
   })
 
-  // describe('watch', function(){
+  describe('watch', function(){
 
-  //   it('should return changed file for a glob pattern', function(done){
+    it('should return changed file for a glob pattern', function(done){
 
-  //     var now = new Date();
-  //     james.watch('test/fixtures/*.js').onValue(function(files){
-  //       assert.deepEqual(files,
-  //         [ { name: '/Users/pyykkis/work/james.js/test/fixtures/hello.js',
-  //             content: 'console.log("Hello ");\n' }
-  //         ]);
-  //       done();
-  //       return Bacon.noMore;
-  //     });
+      var now = new Date();
+      Bacon.once(james.watch('test/**/hello.*').onValue(function(files){
+        assert.deepEqual(files,
+          [ { name: path.resolve('test/fixtures/hello.js'),
+              content: 'console.log("Hello ");\n' }
+          ]);
+        done();
+      }));
 
-  //     setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now)}, 50);
-  //   })
-  // })
+      setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now)}, 100);
+    })
+  })
 
   describe('write', function(){
 
