@@ -46,9 +46,9 @@ describe('james', function(){
       var files, fileStream;
 
       files = [
-        { name: '/Users/pyykkis/work/james.js/test/fixtures/foo.js',
+        { name: 'test/fixtures/foo.js',
           content: 'console.log("foo");\n' },
-        { name: '/Users/pyykkis/work/james.js/test/fixtures/bar.js',
+        { name: 'test/fixtures/bar.js',
           content: 'console.log("bar");\n' }
       ];
 
