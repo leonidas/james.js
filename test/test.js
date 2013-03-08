@@ -9,7 +9,7 @@ describe('james', function(){
 
   describe('files', function(){
 
-    it('should return matching files for glob a glob pattern', function(){
+    it('should return matching files for glob a glob pattern', function(done){
 
       james.files('test/fixtures/**/*.js').onValue(function(files){
         Q.all(files).then(function(files) {
@@ -20,6 +20,7 @@ describe('james', function(){
               { name: 'test/fixtures/world.js',
                 content: 'console.log("World!");\n' }
             ])
+          done();
         })
       })
     })
@@ -31,11 +32,13 @@ describe('james', function(){
 
       var now = new Date();
       Bacon.once(james.watch('test/**/hello.*').onValue(function(files){
-        assert.deepEqual(files,
-          [ { name: path.resolve('test/fixtures/hello.js'),
-              content: 'console.log("Hello ");\n' }
-          ]);
-        done();
+        Q.all(files).then(function(files){
+          assert.deepEqual(files,
+            [ { name: path.resolve('test/fixtures/hello.js'),
+                content: 'console.log("Hello ");\n' }
+            ]);
+          done();
+        })
       }));
 
       setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now)}, 100);

@@ -1,32 +1,39 @@
-var Bacon  = require('baconjs').Bacon,
-    Gaze   = require('gaze').Gaze,
-    fs     = require('fs'),
-    path   = require('path'),
-    mkdirp = require('mkdirp'),
-    glob   = require('glob'),
-    Q      = require('q');
+var Bacon    = require('baconjs').Bacon,
+    Gaze     = require('gaze').Gaze,
+    fs       = require('fs'),
+    path     = require('path'),
+    mkdirp   = require('mkdirp'),
+    glob     = require('glob'),
+    Q        = require('q'),
+    readFile = Q.nfbind(fs.readFile);
+
+exports.files = files = function(pattern) {
+  var files = glob.sync(pattern).map(function(filename) {
+    return readFile(filename, 'utf8')
+      .then(function(content) {
+        return {
+          name: filename,
+          content: content
+        };
+      })
+  });
+
+  return Bacon.once(files);
+};
 
 exports.watch = function(pattern) {
   var gazer = new Gaze(pattern);
   return Bacon.fromEventTarget(gazer, 'all', function(event, filename) {
-    return [
-      {
-        name: filename,
-        content: fs.readFileSync(filename, 'utf8')
-      }
-    ];
-  });
-};
-
-exports.files = files = function(pattern) {
-  var files = glob.sync(pattern).map(function(filename) {
-    return {
-      name: filename,
-      content: Q.nfcall(fs.readFile(filename, 'utf8'))
-    };
-  });
-
-  return Bacon.once(files);
+    return readFile(filename, 'utf8')
+      .then(function(content) {
+        return [
+          {
+            name: filename,
+            content: content
+          }
+        ]
+      })
+  })
 };
 
 exports.write = function(files) {
@@ -39,6 +46,7 @@ exports.write = function(files) {
       .fail(function(error) {
         console.log(error);
       })
+      .done();
   });
 };
 
