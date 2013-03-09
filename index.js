@@ -36,18 +36,24 @@ exports.watch = function(pattern) {
   });
 };
 
-exports.write = function(files) {
-  files.map(function(file) {
-    file
-      .then(function(file) {
-        mkdirp.sync(path.dirname(file.name));
-        fs.writeFileSync(file.name, file.content, 'utf8');
-      })
-      .fail(function(error) {
-        console.log(error);
-      })
-      .done();
-  });
+exports.write = function(destination) {
+  return function(files) {
+    files.map(function(file) {
+      file
+        .then(function(file) {
+          if (!destination) {
+            destination = file.name;
+          }
+
+          mkdirp.sync(path.dirname(destination));
+          fs.writeFileSync(destination, file.content, 'utf8');
+        })
+        .fail(function(error) {
+          console.log(error);
+        })
+        .done();
+    });
+  };
 };
 
 exports.transformer = function(transform) {

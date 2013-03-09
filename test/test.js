@@ -73,6 +73,30 @@ describe('james', function(){
     });
   });
 
+  describe('#write(dest)', function(){
+
+    it('should write files to the specified destination', function(done){
+      var files, fileStream;
+
+      files = [
+        Q.when({ name: 'test/fixtures/foo.js',
+          content: 'console.log("foo");\n' }),
+        Q.when({ name: 'test/fixtures/bar.js',
+          content: 'console.log("bar");\n' })
+      ];
+
+      Bacon.once(files).onValue(james.write('test/fixtures/index.js'));
+
+      setTimeout(function(){
+        files[1].then(function(file){
+          assert.equal(fs.readFileSync('test/fixtures/index.js', 'utf8'), file.content);
+          fs.unlinkSync('test/fixtures/index.js');
+        });
+        done();
+      }, 100);
+    });
+  });
+
   describe('sync transformer', function(){
 
     it('should return the result of the transformation', function(done){
