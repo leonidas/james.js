@@ -12,19 +12,20 @@ describe('james', function(){
     it('should return matching files for glob a glob pattern', function(done){
 
       james.files('test/fixtures/**/*.js').onValue(function(files){
-        Q.all(files).then(function(files) {
-          assert.deepEqual(files,
-            [
-              { name: 'test/fixtures/hello.js',
-                content: 'console.log("Hello ");\n' },
-              { name: 'test/fixtures/world.js',
-                content: 'console.log("World!");\n' }
-            ])
-          done();
-        })
-      })
-    })
-  })
+        Q.all(files)
+          .then(function(files){
+            assert.deepEqual(files,
+              [
+                { name: 'test/fixtures/hello.js',
+                  content: 'console.log("Hello ");\n' },
+                { name: 'test/fixtures/world.js',
+                  content: 'console.log("World!");\n' }
+              ]);
+          })
+          .done(done);
+      });
+    });
+  });
 
   describe('#watch', function(){
 
@@ -39,12 +40,12 @@ describe('james', function(){
                   content: 'console.log("Hello ");\n' }
               ]);
           })
-          .done(done)
+          .done(done);
       }));
 
-      setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now)}, 100);
-    })
-  })
+      setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now);}, 100);
+    });
+  });
 
   describe('#write', function(){
 
@@ -65,12 +66,12 @@ describe('james', function(){
           file.then(function(file){
             assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
             fs.unlinkSync(file.name);
-          })
+          });
         });
         done();
-      }, 100)
-    })
-  })
+      }, 100);
+    });
+  });
 
   describe('sync transformer', function(){
 
@@ -86,7 +87,7 @@ describe('james', function(){
         return {
           name:    file.name + "sync",
           content: file.content + "sync"
-        }
+        };
       });
 
       Bacon.once(files).map(syncTransformer).onValue(function(files) {
@@ -98,9 +99,9 @@ describe('james', function(){
             ]);
           })
           .done(done);
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe('async transformer', function(){
 
@@ -117,8 +118,8 @@ describe('james', function(){
           return {
             name:    file.name + "async",
             content: file.content + "async"
-          }
-        })
+          };
+        });
       });
 
       Bacon.once(files).map(asyncTransformer).onValue(function(files) {
@@ -129,8 +130,8 @@ describe('james', function(){
               { name: 'bar.jsasync', content: 'barasync' }
             ]);
           })
-          .done(done)
-      })
-    })
-  })
-})
+          .done(done);
+      });
+    });
+  });
+});

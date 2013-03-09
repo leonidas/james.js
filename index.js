@@ -7,7 +7,7 @@ var Bacon    = require('baconjs').Bacon,
     Q        = require('q'),
     readFile = Q.nfbind(fs.readFile);
 
-exports.files = files = function(pattern) {
+exports.files = function(pattern) {
   var files = glob.sync(pattern).map(function(filename) {
     return readFile(filename, 'utf8')
       .then(function(content) {
@@ -15,7 +15,7 @@ exports.files = files = function(pattern) {
           name: filename,
           content: content
         };
-      })
+      });
   });
 
   return Bacon.once(files);
@@ -31,9 +31,9 @@ exports.watch = function(pattern) {
             name: filename,
             content: content
           }
-        ]
-      })
-  })
+        ];
+      });
+  });
 };
 
 exports.write = function(files) {
@@ -55,7 +55,7 @@ exports.transformer = function(transform) {
     return files.map(function(file) {
       return file.then(function(file) {
         return transform(file);
-      })
-    })
-  }
+      });
+    });
+  };
 };

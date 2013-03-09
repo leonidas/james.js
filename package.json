@@ -4,7 +4,7 @@
   "description": "James is a composable build tool which prefers code over configuration.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "jshint **/*.js && mocha"
   },
   "repository": "",
   "keywords": [
@@ -31,6 +31,7 @@
   },
   "preferGlobal": true,
   "devDependencies": {
-    "mocha": "~1.8.1"
+    "mocha": "~1.8.1",
+    "jshint": "~1.1.0"
   }
 }
