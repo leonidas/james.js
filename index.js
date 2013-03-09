@@ -50,3 +50,12 @@ exports.write = function(files) {
   });
 };
 
+exports.transformer = function(transform) {
+  return function(files) {
+    return files.map(function(file) {
+      return file.then(function(file) {
+        return transform(file);
+      })
+    })
+  }
+};

@@ -7,7 +7,7 @@ var assert = require('assert'),
 
 describe('james', function(){
 
-  describe('files', function(){
+  describe('#files', function(){
 
     it('should return matching files for glob a glob pattern', function(done){
 
@@ -26,26 +26,27 @@ describe('james', function(){
     })
   })
 
-  describe('watch', function(){
+  describe('#watch', function(){
 
     it('should return changed file for a glob pattern', function(done){
 
       var now = new Date();
       Bacon.once(james.watch('test/**/hello.*').onValue(function(files){
-        Q.all(files).then(function(files){
-          assert.deepEqual(files,
-            [ { name: path.resolve('test/fixtures/hello.js'),
-                content: 'console.log("Hello ");\n' }
-            ]);
-          done();
-        })
+        Q.all(files)
+          .then(function(files){
+            assert.deepEqual(files,
+              [ { name: path.resolve('test/fixtures/hello.js'),
+                  content: 'console.log("Hello ");\n' }
+              ]);
+          })
+          .done(done)
       }));
 
       setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now)}, 100);
     })
   })
 
-  describe('write', function(){
+  describe('#write', function(){
 
     it('should write files to their destination', function(done){
       var files, fileStream;
@@ -68,6 +69,68 @@ describe('james', function(){
         });
         done();
       }, 100)
+    })
+  })
+
+  describe('sync transformer', function(){
+
+    it('should return the result of the transformation', function(done){
+      var files, syncTransformer, fileStream;
+
+      files = [
+        Q.when({ name: 'foo.js', content: 'foo' }),
+        Q.when({ name: 'bar.js', content: 'bar' })
+      ];
+
+      syncTransformer = james.transformer(function(file){
+        return {
+          name:    file.name + "sync",
+          content: file.content + "sync"
+        }
+      });
+
+      Bacon.once(files).map(syncTransformer).onValue(function(files) {
+        Q.all(files)
+          .then(function(files) {
+            assert.deepEqual(files, [
+              { name: 'foo.jssync', content: 'foosync' },
+              { name: 'bar.jssync', content: 'barsync' }
+            ]);
+          })
+          .done(done);
+      })
+    })
+  })
+
+  describe('async transformer', function(){
+
+    it('should return the result of the transformation', function(done){
+      var files, asyncTransformer, fileStream;
+
+      files = [
+        Q.when({ name: 'foo.js', content: 'foo' }),
+        Q.when({ name: 'bar.js', content: 'bar' })
+      ];
+
+      asyncTransformer = james.transformer(function(file) {
+        return Q.delay(50).then(function() {
+          return {
+            name:    file.name + "async",
+            content: file.content + "async"
+          }
+        })
+      });
+
+      Bacon.once(files).map(asyncTransformer).onValue(function(files) {
+        Q.all(files)
+          .then(function(files) {
+            assert.deepEqual(files, [
+              { name: 'foo.jsasync', content: 'fooasync' },
+              { name: 'bar.jsasync', content: 'barasync' }
+            ]);
+          })
+          .done(done)
+      })
     })
   })
 })
