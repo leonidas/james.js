@@ -1,6 +1,6 @@
 {
   "name": "james",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "James is a composable build tool which prefers code over configuration.",
   "main": "index.js",
   "scripts": {
