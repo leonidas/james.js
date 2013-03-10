@@ -41,12 +41,14 @@ exports.write = function(destination) {
     files.map(function(file) {
       file
         .then(function(file) {
-          if (!destination) {
-            destination = file.name;
-          }
+          (function(destination) {
+            if (!destination) {
+              destination = file.name;
+            }
 
-          mkdirp.sync(path.dirname(destination));
-          fs.writeFileSync(destination, file.content, 'utf8');
+            mkdirp.sync(path.dirname(destination));
+            fs.writeFileSync(destination, file.content, 'utf8');
+          })(destination);
         })
         .fail(function(error) {
           console.log(error);

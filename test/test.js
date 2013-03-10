@@ -59,17 +59,18 @@ describe('james', function(){
           content: 'console.log("bar");\n' })
       ];
 
-      Bacon.once(files).onValue(james.write);
+      Bacon.once(files).onValue(james.write());
 
       setTimeout(function(){
-        files.map(function(file){
-          file.then(function(file){
-            assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
-            fs.unlinkSync(file.name);
-          });
-        });
-        done();
-      }, 100);
+        Q.all(files)
+          .then(function(files) {
+            files.map(function(file){
+              assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
+              fs.unlinkSync(file.name);
+            });
+          })
+          .done(done);
+        }, 100);
     });
   });
 
