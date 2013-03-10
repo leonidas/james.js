@@ -1,6 +1,7 @@
 var assert = require('assert'),
     fs     = require('fs'),
     path   = require('path'),
+    mkdirp = require('mkdirp'),
     james  = require('../index'),
     Bacon  = require('baconjs').Bacon,
     Q      = require('q');
@@ -8,19 +9,34 @@ var assert = require('assert'),
 describe('james', function(){
 
   describe('#files', function(){
+    var files = [
+      { name: 'test/fixtures/hello.js',
+        content: 'console.log("Hello ");\n' },
+      { name: 'test/fixtures/world.js',
+        content: 'console.log("World!");\n' }
+    ];
 
-    it('should return matching files for glob a glob pattern', function(done){
+    beforeEach(function(){
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        mkdirp.sync(path.dirname(file.name));
+        fs.writeFileSync(file.name, file.content, 'utf8');
+      }
+    });
 
-      james.files('test/fixtures/**/*.js').onValue(function(files){
-        Q.all(files)
-          .then(function(files){
-            assert.deepEqual(files,
-              [
-                { name: 'test/fixtures/hello.js',
-                  content: 'console.log("Hello ");\n' },
-                { name: 'test/fixtures/world.js',
-                  content: 'console.log("World!");\n' }
-              ]);
+    afterEach(function(){
+      for (var i = 0; i < files.length; i++) {
+        var file = files[i];
+        fs.unlinkSync(file.name);
+      }
+    });
+
+    it.only('should return matching files for glob a glob pattern', function(done){
+
+      james.files('test/fixtures/**/*.js').onValue(function(fs){
+        Q.all(fs)
+          .then(function(fs){
+            assert.deepEqual(fs, files);
           })
           .done(done);
       });
