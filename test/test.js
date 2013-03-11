@@ -62,6 +62,33 @@ describe('james', function(){
     });
   });
 
+  describe('#read', function(){
+    var file = {
+      name:    'console.log("hello");',
+      content: 'test/fixtures/foo.js'
+    };
+
+    beforeEach(function(){
+      mkdirp.sync(path.dirname(file.name));
+      fs.writeFileSync(file.name, file.content, 'utf8');
+    });
+
+    afterEach(function(){
+      fs.unlinkSync(file.name);
+    });
+
+    it.only('should return a read stream for the file', function(done){
+      var res   = '',
+          input = james.read(file.name);
+
+      input.on('data', function(data){res += data});
+      input.on('end', function() {
+        assert.equal(res, fs.readFileSync(file.name, 'utf8'));
+        done();
+      });
+    });
+  });
+
   // describe('#write', function(){
 
   //   it('should write files to their destination', function(done){

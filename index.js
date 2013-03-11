@@ -1,10 +1,10 @@
-var gaze     = require('gaze'),
-    fs       = require('fs'),
-    path     = require('path'),
-    mkdirp   = require('mkdirp'),
-    glob     = require('glob'),
-    through  = require('through'),
-    Q        = require('q');
+var gaze    = require('gaze'),
+    fs      = require('fs'),
+    path    = require('path'),
+    mkdirp  = require('mkdirp'),
+    glob    = require('glob'),
+    through = require('through'),
+    Q       = require('q');
 
 exports.list = function(pattern, cb) {
   Q.nfcall(glob, pattern).then(cb).done();
