@@ -5,25 +5,7 @@ var assert = require('assert'),
     mkdirp = require('mkdirp'),
     james  = require('../index'),
     util   = require('util'),
-    Q      = require('q'),
-    StringStream;
-
-function StringStream(data) {
-  stream.Duplex.call(this);
-  this.data = data || '';
-};
-
-util.inherits(StringStream, stream.Duplex);
-
-StringStream.prototype._read = function() {
-  this.push(this.data);
-  this.push(null);
-};
-
-StringStream.prototype._write = function(chunk, encoding, cb) {
-  this.data += chunk;
-  cb();
-};
+    Q      = require('q');
 
 describe('james', function(){
 
@@ -100,12 +82,12 @@ describe('james', function(){
 
     it('should return a read stream for the file', function(done){
       var src  = james.read(file.name),
-          dest = new StringStream();
+          dest = new stream.PassThrough();
 
       src.pipe(dest);
 
       dest.on('finish', function() {
-        assert.equal(dest.data, file.content);
+        assert.equal(dest.read().toString(), file.content);
         done();
       });
     });
@@ -122,10 +104,12 @@ describe('james', function(){
     });
 
     it('should return a write stream for the file', function(done){
-      var src  = new StringStream(file.content),
+      var src  = new stream.PassThrough(),
           dest = james.write(file.name);
 
       src.pipe(dest);
+      src.write(file.content);
+      src.end();
 
       dest.on('close', function(){
         assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
@@ -137,18 +121,20 @@ describe('james', function(){
   describe('sync transformer', function(){
 
     it('should return the result of the transformation', function(done){
-      var src  = new StringStream("hello "),
-          dest = new StringStream(),
+      var src  = new stream.PassThrough(),
+          dest = new stream.PassThrough(),
           transformer;
 
       transformer = james.transformer(function(content){
-        return content + "world!"
+        return content + 'world!';
       });
 
       src.pipe(transformer).pipe(dest);
+      src.write('Hello ');
+      src.end();
 
       dest.on('finish', function(){
-        assert.equal(dest.data, "hello world!");
+        assert.equal(dest.read().toString(), 'Hello world!');
         done();
       });
     });
@@ -157,20 +143,22 @@ describe('james', function(){
   describe('async transformer', function(){
 
     it('should return the result of the transformation', function(done){
-      var src  = new StringStream("hello "),
-          dest = new StringStream(),
+      var src  = new stream.PassThrough(),
+          dest = new stream.PassThrough(),
           transformer;
 
       transformer = james.transformer(function(content) {
         return Q.delay(50).then(function() {
-          return content + "async world!"
+          return content + 'async world!';
         });
       });
 
       src.pipe(transformer).pipe(dest);
+      src.write('Hello ');
+      src.end();
 
       dest.on('finish', function(){
-        assert.equal(dest.data, "hello async world!");
+        assert.equal(dest.read().toString(), 'Hello async world!');
         done();
       });
     });
