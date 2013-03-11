@@ -3,7 +3,26 @@ var assert = require('assert'),
     stream = require('readable-stream'),
     path   = require('path'),
     mkdirp = require('mkdirp'),
-    james  = require('../index');
+    james  = require('../index'),
+    util   = require('util')
+    StringStream;
+
+function StringStream(data) {
+  stream.Duplex.call(this);
+  this.data = data || '';
+};
+
+util.inherits(StringStream, stream.Duplex);
+
+StringStream.prototype._read = function() {
+  this.push(this.data);
+  this.push(null);
+};
+
+StringStream.prototype._write = function(chunk, encoding, cb) {
+  this.data += chunk;
+  cb();
+};
 
 describe('james', function(){
 
@@ -80,18 +99,12 @@ describe('james', function(){
 
     it('should return a read stream for the file', function(done){
       var src  = james.read(file.name),
-          dest = new stream.Writable(),
-          res  = '';
-
-      dest._write = function(chunk, encoding, cb) {
-        res += chunk;
-        cb();
-      };
+          dest = new StringStream();
 
       src.pipe(dest);
 
       dest.on('finish', function() {
-        assert.equal(res, file.content);
+        assert.equal(dest.data, file.content);
         done();
       });
     });
@@ -108,13 +121,8 @@ describe('james', function(){
     });
 
     it('should return a write stream for the file', function(done){
-      var src  = new stream.Readable(),
+      var src  = new StringStream(file.content),
           dest = james.write(file.name);
-
-      src._read = function() {
-        this.push(file.content);
-        this.push(null);
-      };
 
       src.pipe(dest);
 
@@ -128,29 +136,18 @@ describe('james', function(){
   describe('sync transformer', function(){
 
     it('should return the result of the transformation', function(done){
-      var src  = new stream.Readable(),
-          dest = new stream.Writable(),
-          res  = '',
-          syncTransformer;
+      var src  = new StringStream("hello "),
+          dest = new StringStream(),
+          transformer;
 
-      src._read = function() {
-        this.push("hello ");
-        this.push(null);
-      };
-
-      dest._write = function(chunk, encoding, cb) {
-        res += chunk;
-        cb();
-      };
-
-      syncTransformer = james.transformer(function(content){
+      transformer = james.transformer(function(content){
         return content + "world!"
       });
 
-      src.pipe(syncTransformer).pipe(dest);
+      src.pipe(transformer).pipe(dest);
 
       dest.on('finish', function(){
-        assert.equal(res, "hello world!");
+        assert.equal(dest.data, "hello world!");
         done();
       });
     });
