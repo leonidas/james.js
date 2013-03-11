@@ -4,7 +4,8 @@ var assert = require('assert'),
     path   = require('path'),
     mkdirp = require('mkdirp'),
     james  = require('../index'),
-    util   = require('util')
+    util   = require('util'),
+    Q      = require('q'),
     StringStream;
 
 function StringStream(data) {
@@ -153,35 +154,25 @@ describe('james', function(){
     });
   });
 
-  // describe('async transformer', function(){
+  describe('async transformer', function(){
 
-  //   it('should return the result of the transformation', function(done){
-  //     var files, asyncTransformer, fileStream;
+    it('should return the result of the transformation', function(done){
+      var src  = new StringStream("hello "),
+          dest = new StringStream(),
+          transformer;
 
-  //     files = [
-  //       Q.when({ name: 'foo.js', content: 'foo' }),
-  //       Q.when({ name: 'bar.js', content: 'bar' })
-  //     ];
+      transformer = james.transformer(function(content) {
+        return Q.delay(50).then(function() {
+          return content + "async world!"
+        });
+      });
 
-  //     asyncTransformer = james.transformer(function(file) {
-  //       return Q.delay(50).then(function() {
-  //         return {
-  //           name:    file.name + "async",
-  //           content: file.content + "async"
-  //         };
-  //       });
-  //     });
+      src.pipe(transformer).pipe(dest);
 
-  //     Bacon.once(files).map(asyncTransformer).onValue(function(files) {
-  //       Q.all(files)
-  //         .then(function(files) {
-  //           assert.deepEqual(files, [
-  //             { name: 'foo.jsasync', content: 'fooasync' },
-  //             { name: 'bar.jsasync', content: 'barasync' }
-  //           ]);
-  //         })
-  //         .done(done);
-  //     });
-  //   });
-  // });
+      dest.on('finish', function(){
+        assert.equal(dest.data, "hello async world!");
+        done();
+      });
+    });
+  });
 });
