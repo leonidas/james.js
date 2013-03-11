@@ -36,7 +36,7 @@ exports.transformer = function(transform) {
       data += chunk;
     },
     function end() {
-      stream = this;
+      var stream = this;
       Q.when(transform(data))
         .then(function(res) {
           stream.queue(res);

@@ -1,6 +1,6 @@
 var assert = require('assert'),
     fs     = require('fs'),
-    stream = require('readable-stream')
+    stream = require('readable-stream'),
     path   = require('path'),
     mkdirp = require('mkdirp'),
     james  = require('../index');
@@ -125,35 +125,36 @@ describe('james', function(){
     });
   });
 
-  // describe('sync transformer', function(){
+  describe('sync transformer', function(){
 
-  //   it('should return the result of the transformation', function(done){
-  //     var files, syncTransformer, fileStream;
+    it('should return the result of the transformation', function(done){
+      var src  = new stream.Readable(),
+          dest = new stream.Writable(),
+          res  = '',
+          syncTransformer;
 
-  //     files = [
-  //       Q.when({ name: 'foo.js', content: 'foo' }),
-  //       Q.when({ name: 'bar.js', content: 'bar' })
-  //     ];
+      src._read = function() {
+        this.push("hello ");
+        this.push(null);
+      };
 
-  //     syncTransformer = james.transformer(function(file){
-  //       return {
-  //         name:    file.name + "sync",
-  //         content: file.content + "sync"
-  //       };
-  //     });
+      dest._write = function(chunk, encoding, cb) {
+        res += chunk;
+        cb();
+      };
 
-  //     Bacon.once(files).map(syncTransformer).onValue(function(files) {
-  //       Q.all(files)
-  //         .then(function(files) {
-  //           assert.deepEqual(files, [
-  //             { name: 'foo.jssync', content: 'foosync' },
-  //             { name: 'bar.jssync', content: 'barsync' }
-  //           ]);
-  //         })
-  //         .done(done);
-  //     });
-  //   });
-  // });
+      syncTransformer = james.transformer(function(content){
+        return content + "world!"
+      });
+
+      src.pipe(syncTransformer).pipe(dest);
+
+      dest.on('finish', function(){
+        assert.equal(res, "hello world!");
+        done();
+      });
+    });
+  });
 
   // describe('async transformer', function(){
 
