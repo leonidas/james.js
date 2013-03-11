@@ -2,177 +2,176 @@ var assert = require('assert'),
     fs     = require('fs'),
     path   = require('path'),
     mkdirp = require('mkdirp'),
-    james  = require('../index'),
-    Bacon  = require('baconjs').Bacon,
-    Q      = require('q');
+    james  = require('../index');
 
 describe('james', function(){
 
-  describe('#files', function(){
+  describe('#list', function(){
     var files = [
-      { name: 'test/fixtures/hello.js',
-        content: 'console.log("Hello ");\n' },
-      { name: 'test/fixtures/world.js',
-        content: 'console.log("World!");\n' }
+      'test/fixtures/hello.js',
+      'test/fixtures/world.js'
     ];
 
     beforeEach(function(){
       for (var i = 0; i < files.length; i++) {
         var file = files[i];
-        mkdirp.sync(path.dirname(file.name));
-        fs.writeFileSync(file.name, file.content, 'utf8');
+        mkdirp.sync(path.dirname(file));
+        fs.writeFileSync(file, 'console.log(hello);', 'utf8');
       }
     });
 
     afterEach(function(){
       for (var i = 0; i < files.length; i++) {
         var file = files[i];
-        fs.unlinkSync(file.name);
+        fs.unlinkSync(file);
       }
     });
 
-    it.only('should return matching files for glob a glob pattern', function(done){
-
-      james.files('test/fixtures/**/*.js').onValue(function(fs){
-        Q.all(fs)
-          .then(function(fs){
-            assert.deepEqual(fs, files);
-          })
-          .done(done);
+    it('should return matching files for glob a glob pattern', function(done){
+      james.list('test/fixtures/**/*.js', function(res) {
+        assert.deepEqual(res, files);
+        done();
       });
     });
   });
 
   describe('#watch', function(){
 
-    it('should return changed file for a glob pattern', function(done){
+    var file = 'test/fixtures/hello.js';
 
-      var now = new Date();
-      Bacon.once(james.watch('test/**/hello.*').onValue(function(files){
-        Q.all(files)
-          .then(function(files){
-            assert.deepEqual(files,
-              [ { name: path.resolve('test/fixtures/hello.js'),
-                  content: 'console.log("Hello ");\n' }
-              ]);
-          })
-          .done(done);
-      }));
-
-      setTimeout(function(){fs.utimesSync('test/fixtures/hello.js', now, now);}, 100);
+    beforeEach(function(){
+      mkdirp.sync(path.dirname(file));
+      fs.writeFileSync(file, 'console.log(hello);', 'utf8');
     });
-  });
 
-  describe('#write', function(){
+    afterEach(function(){ fs.unlinkSync(file); });
 
-    it('should write files to their destination', function(done){
-      var files, fileStream;
+    it('should return added/changed/deleted file for a glob pattern', function(done){
 
-      files = [
-        Q.when({ name: 'test/fixtures/foo.js',
-          content: 'console.log("foo");\n' }),
-        Q.when({ name: 'test/fixtures/bar.js',
-          content: 'console.log("bar");\n' })
-      ];
-
-      Bacon.once(files).onValue(james.write());
-
-      setTimeout(function(){
-        Q.all(files)
-          .then(function(files) {
-            files.map(function(file){
-              assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
-              fs.unlinkSync(file.name);
-            });
-          })
-          .done(done);
-        }, 100);
-    });
-  });
-
-  describe('#write(dest)', function(){
-
-    it('should write files to the specified destination', function(done){
-      var files, fileStream;
-
-      files = [
-        Q.when({ name: 'test/fixtures/foo.js',
-          content: 'console.log("foo");\n' }),
-        Q.when({ name: 'test/fixtures/bar.js',
-          content: 'console.log("bar");\n' })
-      ];
-
-      Bacon.once(files).onValue(james.write('test/fixtures/index.js'));
-
-      setTimeout(function(){
-        files[1].then(function(file){
-          assert.equal(fs.readFileSync('test/fixtures/index.js', 'utf8'), file.content);
-          fs.unlinkSync('test/fixtures/index.js');
-        });
+      james.watch('test/**/*.js', function(event, file) {
+        assert.equal(event, 'changed');
+        assert.equal(file, 'test/fixtures/hello.js');
         done();
-      }, 100);
+      });
+
+      setTimeout(function(){
+        var now = new Date();
+        fs.utimesSync(file, now, now);
+      },
+        1000);
     });
   });
 
-  describe('sync transformer', function(){
+  // describe('#write', function(){
 
-    it('should return the result of the transformation', function(done){
-      var files, syncTransformer, fileStream;
+  //   it('should write files to their destination', function(done){
+  //     var files, fileStream;
 
-      files = [
-        Q.when({ name: 'foo.js', content: 'foo' }),
-        Q.when({ name: 'bar.js', content: 'bar' })
-      ];
+  //     files = [
+  //       Q.when({ name: 'test/fixtures/foo.js',
+  //         content: 'console.log("foo");\n' }),
+  //       Q.when({ name: 'test/fixtures/bar.js',
+  //         content: 'console.log("bar");\n' })
+  //     ];
 
-      syncTransformer = james.transformer(function(file){
-        return {
-          name:    file.name + "sync",
-          content: file.content + "sync"
-        };
-      });
+  //     Bacon.once(files).onValue(james.write());
 
-      Bacon.once(files).map(syncTransformer).onValue(function(files) {
-        Q.all(files)
-          .then(function(files) {
-            assert.deepEqual(files, [
-              { name: 'foo.jssync', content: 'foosync' },
-              { name: 'bar.jssync', content: 'barsync' }
-            ]);
-          })
-          .done(done);
-      });
-    });
-  });
+  //     setTimeout(function(){
+  //       Q.all(files)
+  //         .then(function(files) {
+  //           files.map(function(file){
+  //             assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
+  //             fs.unlinkSync(file.name);
+  //           });
+  //         })
+  //         .done(done);
+  //       }, 100);
+  //   });
+  // });
 
-  describe('async transformer', function(){
+  // describe('#write(dest)', function(){
 
-    it('should return the result of the transformation', function(done){
-      var files, asyncTransformer, fileStream;
+  //   it('should write files to the specified destination', function(done){
+  //     var files, fileStream;
 
-      files = [
-        Q.when({ name: 'foo.js', content: 'foo' }),
-        Q.when({ name: 'bar.js', content: 'bar' })
-      ];
+  //     files = [
+  //       Q.when({ name: 'test/fixtures/foo.js',
+  //         content: 'console.log("foo");\n' }),
+  //       Q.when({ name: 'test/fixtures/bar.js',
+  //         content: 'console.log("bar");\n' })
+  //     ];
 
-      asyncTransformer = james.transformer(function(file) {
-        return Q.delay(50).then(function() {
-          return {
-            name:    file.name + "async",
-            content: file.content + "async"
-          };
-        });
-      });
+  //     Bacon.once(files).onValue(james.write('test/fixtures/index.js'));
 
-      Bacon.once(files).map(asyncTransformer).onValue(function(files) {
-        Q.all(files)
-          .then(function(files) {
-            assert.deepEqual(files, [
-              { name: 'foo.jsasync', content: 'fooasync' },
-              { name: 'bar.jsasync', content: 'barasync' }
-            ]);
-          })
-          .done(done);
-      });
-    });
-  });
+  //     setTimeout(function(){
+  //       files[1].then(function(file){
+  //         assert.equal(fs.readFileSync('test/fixtures/index.js', 'utf8'), file.content);
+  //         fs.unlinkSync('test/fixtures/index.js');
+  //       });
+  //       done();
+  //     }, 100);
+  //   });
+  // });
+
+  // describe('sync transformer', function(){
+
+  //   it('should return the result of the transformation', function(done){
+  //     var files, syncTransformer, fileStream;
+
+  //     files = [
+  //       Q.when({ name: 'foo.js', content: 'foo' }),
+  //       Q.when({ name: 'bar.js', content: 'bar' })
+  //     ];
+
+  //     syncTransformer = james.transformer(function(file){
+  //       return {
+  //         name:    file.name + "sync",
+  //         content: file.content + "sync"
+  //       };
+  //     });
+
+  //     Bacon.once(files).map(syncTransformer).onValue(function(files) {
+  //       Q.all(files)
+  //         .then(function(files) {
+  //           assert.deepEqual(files, [
+  //             { name: 'foo.jssync', content: 'foosync' },
+  //             { name: 'bar.jssync', content: 'barsync' }
+  //           ]);
+  //         })
+  //         .done(done);
+  //     });
+  //   });
+  // });
+
+  // describe('async transformer', function(){
+
+  //   it('should return the result of the transformation', function(done){
+  //     var files, asyncTransformer, fileStream;
+
+  //     files = [
+  //       Q.when({ name: 'foo.js', content: 'foo' }),
+  //       Q.when({ name: 'bar.js', content: 'bar' })
+  //     ];
+
+  //     asyncTransformer = james.transformer(function(file) {
+  //       return Q.delay(50).then(function() {
+  //         return {
+  //           name:    file.name + "async",
+  //           content: file.content + "async"
+  //         };
+  //       });
+  //     });
+
+  //     Bacon.once(files).map(asyncTransformer).onValue(function(files) {
+  //       Q.all(files)
+  //         .then(function(files) {
+  //           assert.deepEqual(files, [
+  //             { name: 'foo.jsasync', content: 'fooasync' },
+  //             { name: 'bar.jsasync', content: 'barasync' }
+  //           ]);
+  //         })
+  //         .done(done);
+  //     });
+  //   });
+  // });
 });

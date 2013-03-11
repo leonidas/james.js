@@ -1,69 +1,48 @@
-var Bacon    = require('baconjs').Bacon,
-    Gaze     = require('gaze').Gaze,
+var gaze     = require('gaze'),
     fs       = require('fs'),
     path     = require('path'),
     mkdirp   = require('mkdirp'),
     glob     = require('glob'),
-    Q        = require('q'),
-    readFile = Q.nfbind(fs.readFile);
+    through  = require('through'),
+    Q        = require('q');
 
-exports.files = function(pattern) {
-  var files = glob.sync(pattern).map(function(filename) {
-    return readFile(filename, 'utf8')
-      .then(function(content) {
-        return {
-          name: filename,
-          content: content
-        };
-      });
-  });
-
-  return Bacon.once(files);
+exports.list = function(pattern, cb) {
+  Q.nfcall(glob, pattern).then(cb).done();
 };
 
-exports.watch = function(pattern) {
-  var gazer = new Gaze(pattern);
-  return Bacon.fromEventTarget(gazer, 'all', function(event, filename) {
-    return readFile(filename, 'utf8')
-      .then(function(content) {
-        return [
-          {
-            name: filename,
-            content: content
-          }
-        ];
-      });
-  });
-};
-
-exports.write = function(destination) {
-  return function(files) {
-    files.map(function(file) {
-      file
-        .then(function(file) {
-          (function(destination) {
-            if (!destination) {
-              destination = file.name;
-            }
-
-            mkdirp.sync(path.dirname(destination));
-            fs.writeFileSync(destination, file.content, 'utf8');
-          })(destination);
-        })
-        .fail(function(error) {
-          console.log(error);
-        })
-        .done();
+exports.watch = function(pattern, cb) {
+  Q.nfcall(gaze, pattern)
+  .then(function(watcher) {
+    watcher.on('all', function(event, file) {
+      // Absolute to relative path
+      cb(event, path.relative(process.cwd(), file));
     });
-  };
+  })
+  .done();
 };
+
+exports.read = function(file) {
+  return fs.createReadStream(file);
+}
+
+exports.write = function(file) {
+  mkdirp.sync(path.dirname(file));
+  return fs.createWriteStream(file);
+}
 
 exports.transformer = function(transform) {
-  return function(files) {
-    return files.map(function(file) {
-      return file.then(function(file) {
-        return transform(file);
-      });
+  return (function(data){
+    return through(function write(chunk){
+      data += chunk;
+    },
+    function end() {
+      stream = this;
+      Q.when(transform(data))
+        .then(function(res) {
+          stream.queue(res);
+          stream.queue(null);
+        })
+        .done()
     });
-  };
+  })('')
 };
