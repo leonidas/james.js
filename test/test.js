@@ -1,5 +1,6 @@
 var assert = require('assert'),
     fs     = require('fs'),
+    stream = require('readable-stream')
     path   = require('path'),
     mkdirp = require('mkdirp'),
     james  = require('../index');
@@ -77,68 +78,49 @@ describe('james', function(){
       fs.unlinkSync(file.name);
     });
 
-    it.only('should return a read stream for the file', function(done){
-      var res   = '',
-          input = james.read(file.name);
+    it('should return a read stream for the file', function(done){
+      var src  = james.read(file.name),
+          dest = new stream.Writable(),
+          res  = '';
 
-      input.on('data', function(data){res += data});
-      input.on('end', function() {
-        assert.equal(res, fs.readFileSync(file.name, 'utf8'));
+      dest._write = function(chunk) { res += chunk; };
+
+      src.pipe(dest);
+
+      src.on('close', function() {
+        assert.equal(res, file.content);
         done();
       });
     });
   });
 
-  // describe('#write', function(){
+  describe('#write', function(){
+    var file = {
+      name:    'test/fixtures/foo.js',
+      content: 'console.log("hello");'
+    };
 
-  //   it('should write files to their destination', function(done){
-  //     var files, fileStream;
+    afterEach(function(){
+      fs.unlinkSync(file.name);
+    });
 
-  //     files = [
-  //       Q.when({ name: 'test/fixtures/foo.js',
-  //         content: 'console.log("foo");\n' }),
-  //       Q.when({ name: 'test/fixtures/bar.js',
-  //         content: 'console.log("bar");\n' })
-  //     ];
+    it('should return a write stream for the file', function(done){
+      var src  = new stream.Readable(),
+          dest = james.write(file.name);
 
-  //     Bacon.once(files).onValue(james.write());
+      src._read = function() {
+        this.push(file.content);
+        this.push(null);
+      };
 
-  //     setTimeout(function(){
-  //       Q.all(files)
-  //         .then(function(files) {
-  //           files.map(function(file){
-  //             assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
-  //             fs.unlinkSync(file.name);
-  //           });
-  //         })
-  //         .done(done);
-  //       }, 100);
-  //   });
-  // });
+      src.pipe(dest);
 
-  // describe('#write(dest)', function(){
-
-  //   it('should write files to the specified destination', function(done){
-  //     var files, fileStream;
-
-  //     files = [
-  //       Q.when({ name: 'test/fixtures/foo.js',
-  //         content: 'console.log("foo");\n' }),
-  //       Q.when({ name: 'test/fixtures/bar.js',
-  //         content: 'console.log("bar");\n' })
-  //     ];
-
-  //     Bacon.once(files).onValue(james.write('test/fixtures/index.js'));
-
-  //     setTimeout(function(){
-  //       files[1].then(function(file){
-  //         assert.equal(fs.readFileSync('test/fixtures/index.js', 'utf8'), file.content);
-  //         fs.unlinkSync('test/fixtures/index.js');
-  //       });
-  //       done();
-  //     }, 100);
-  //   });
-  // });
+      dest.on('close', function(){
+        assert.equal(fs.readFileSync(file.name, 'utf8'), file.content);
+        done();
+      });
+    });
+  });
 
   // describe('sync transformer', function(){
 
