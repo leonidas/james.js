@@ -83,11 +83,14 @@ describe('james', function(){
           dest = new stream.Writable(),
           res  = '';
 
-      dest._write = function(chunk) { res += chunk; };
+      dest._write = function(chunk, encoding, cb) {
+        res += chunk;
+        cb();
+      };
 
       src.pipe(dest);
 
-      src.on('close', function() {
+      dest.on('finish', function() {
         assert.equal(res, file.content);
         done();
       });
