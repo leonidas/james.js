@@ -1,12 +1,12 @@
-var gaze   = require('gaze'),
-    fs     = require('fs'),
-    path   = require('path'),
-    mkdirp = require('mkdirp'),
-    glob   = require('glob'),
-    Q      = require('q'),
-    stream = require('readable-stream'), // For node.js 0.8.x support;
-
-tasks = {};
+var gaze     = require('gaze'),
+    fs       = require('fs'),
+    path     = require('path'),
+    mkdirp   = require('mkdirp'),
+    glob     = require('glob'),
+    Q        = require('q'),
+    stream   = require('readable-stream'), // For node.js 0.8.x support
+    Pipeline = require('./lib/pipeline'),
+    tasks    = {};
 
 exports.task = function(name, task) {
   tasks[name] = task;
@@ -44,8 +44,11 @@ exports.watch = function(pattern, cb) {
   .done();
 }
 
-exports.read = function(file) {
-  return fs.createReadStream(file);
+exports.read = function(stream) {
+  if (typeof stream === 'string') {
+    stream = fs.createReadStream(stream);
+  }
+  return new Pipeline(stream);
 }
 
 exports.write = function(file) {
@@ -58,20 +61,20 @@ _transform = function(chunk, encoding, callback) {
   callback();
 }
 
-_flush = function(op) {
+_flush = function(f) {
   return function(callback) {
     var self = this;
-    op(this._file, function(result) {
+    f(this._file, function(result) {
       self.push(result);
       callback();
     });
   }
 }
 
-exports.createStream = function(op) {
+exports.createStream = function(f) {
   var s = new stream.Transform();
   s._file      = '';
   s._transform = _transform;
-  s._flush     = _flush(op);
+  s._flush     = _flush(f);
   return s;
 }

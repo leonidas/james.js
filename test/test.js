@@ -9,6 +9,10 @@ var assert = require('assert'),
 
 describe('james', function(){
 
+  after(function() {
+    fs.rmdirSync('test/fixtures');
+  })
+
   describe('#list', function(){
     var files = [
       'test/fixtures/hello.js',
@@ -84,7 +88,7 @@ describe('james', function(){
       var src  = james.read(file.name),
           dest = new stream.PassThrough();
 
-      src.pipe(dest);
+      src.write(dest);
 
       dest.on('finish', function() {
         assert.equal(dest.read().toString(), file.content);
@@ -158,6 +162,70 @@ describe('james', function(){
         assert.equal(dest.read(), "Hello World!");
         done();
       });
+    });
+  });
+
+  describe('Pipeline', function() {
+    describe('#transform', function() {
+
+      it('should add transform stream to pipeline', function(done) {
+        var src  = new stream.PassThrough(),
+            dest = new stream.PassThrough(),
+            operation,
+            createHelloStream;
+
+        createHelloStream = function(name) {
+          name = name || 'World';
+          return james.createStream(function(file, callback) {
+            callback(file + ' and ' + name);
+          });
+        };
+
+        james.read(src)
+          .transform(createHelloStream)
+          .transform(createHelloStream('Rich'))
+          .write(dest);
+        src.write('Hello James');
+        src.end();
+
+        dest.on('finish', function(){
+          assert.equal(dest.read().toString(), 'Hello James and World and Rich');
+          done();
+        });
+      })
+    });
+
+    describe('#write', function() {
+      it('should write to a given stream', function(done) {
+        var src  = new stream.PassThrough(),
+            dest = new stream.PassThrough();
+
+        james.read(src).write(dest);
+
+        src.write("Hello World!");
+        src.end();
+
+        dest.on('finish', function(){
+          assert.equal(dest.read(), "Hello World!");
+          done();
+        });
+      });
+
+      it('should write to a given file', function(done) {
+        var src  = new stream.PassThrough(),
+            file = 'test/fixtures/write.txt',
+            dest;
+
+        dest = james.read(src).write(file);
+        src.write("Hello World!");
+        src.end();
+
+        dest.on('close', function(){
+          assert.equal(fs.readFileSync(file, 'utf8'), "Hello World!");
+          fs.unlinkSync(file);
+          done();
+        });
+      })
     });
   });
 });
