@@ -18,7 +18,7 @@ james.task('build', function() {
       james.read(file)
         .transform(coffee({bare: true}))
         .transform(uglify)
-        .write(file.replace('src', 'dist').replace('.coffee', '.js'));
+        .write(file.replace('src', 'dist').replace('.coffee', '.min.js'));
     });
   });
 });
@@ -45,6 +45,10 @@ By default, james runs `default` task. Specific tasks can be run by listing them
 ```
 
 ## Transformations
+
+Existing transformations are listed in the [wiki](https://github.com/leonidas/james.js/wiki).
+
+###
 
 James uses node.js streams for transformations.
 Create a [Transform stream](http://nodejs.org/api/stream.html#stream_class_stream_transform),
