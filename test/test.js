@@ -11,7 +11,7 @@ describe('james', function(){
 
   after(function() {
     fs.rmdirSync('test/fixtures');
-  })
+  });
 
   describe('#list', function(){
     var files = [
@@ -192,7 +192,7 @@ describe('james', function(){
           assert.equal(dest.read().toString(), 'Hello James and World and Rich');
           done();
         });
-      })
+      });
     });
 
     describe('#write', function() {
@@ -225,7 +225,7 @@ describe('james', function(){
           fs.unlinkSync(file);
           done();
         });
-      })
+      });
     });
   });
 });
