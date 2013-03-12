@@ -47,27 +47,24 @@ By default, james runs `default` task. Specific tasks can be run by listing them
 
 ## Transformations
 
-James uses node.js streams for transformations. Thanks to awesome Streams2 API, writing transformations is trivial.
+James uses node.js streams for transformations.
+Create a [Transform stream](http://nodejs.org/api/stream.html#stream_transform_transform_chunk_encoding_callback),
+or use `james.createStream` helper.
 
 ```javascript
-var stream = require('readable-stream'), // For node.js 0.8.x support
-    coffee = require('coffee-script');
+// james-coffee/index.js
+var james  = require('james'),
+    coffee = require('coffee-script'),
+    coffeeStream;
 
-transform = function(chunk, encoding, callback) {
-  this._file += chunk;
-  callback();
-}
+coffee.createStream = function() {
+  james.createStream(function(file, callback) {
 
-flush = function(callback) {
-  this.push(coffee.compile(file));
-  callback();
-}
+    // Process the input and call the callback with the result.
+    callback(coffee.compile(file));
+  });
+};
 
-exports.createStream = function(options) {
-  stream = new stream.Transform();
-  stream._file = '';
-  stream._transform = transform;
-  stream._flush = flush;
-  return stream;
-}
+james.read('./hello.coffee').pipe(coffee.createStream()).pipe(process.stdout);
+
 ```
