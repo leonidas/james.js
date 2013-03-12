@@ -117,4 +117,23 @@ describe('james', function(){
       });
     });
   });
+
+  describe('#run', function(){
+    it('should run the listed tasks', function(done){
+      var foo = false;
+
+      james.task('foo', function() {
+        foo = true;
+      });
+
+      james.task('bar', function() {
+        assert(foo);
+        done();
+      });
+
+      james.task('default', ['foo', 'bar']);
+
+      james.run('default');
+    });
+  });
 });

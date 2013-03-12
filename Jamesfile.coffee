@@ -1,10 +1,9 @@
 james = require './index'
-Q     = require 'q'
 
-module.exports = tasks = {}
+james.task 'build', ->
+  james.list 'lib/**/*.js', (files) -> console.log files
 
-tasks.default = -> james.files('lib/**/*.js').onValue (files) ->
-  Q.all(files).then (files) -> console.log files
+james.task 'watch', ->
+  james.watch 'lib/**/*.js', (event, file) -> console.log event, file
 
-tasks.watch   = -> james.watch('lib/**/*.js').onValue tasks.default
-
+james.task 'default', ['build', 'build']
