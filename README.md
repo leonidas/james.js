@@ -7,8 +7,8 @@ James.js is a composable build tool which prefers code over configuration.
 ```javascript
 // Jamesfile.js
 var james  = require('james'),
-    coffee = require('james-coffee'),
-    uglify = require('james-uglify');
+    coffee = require('james-coffee').createStream,
+    uglify = require('james-uglify').createStream;
 
 james.task('build', function() {
   var dist = james.write('dist/my-lib.js'),
@@ -17,9 +17,9 @@ james.task('build', function() {
   james.list('src/**/*.coffee', function(files) {
 
     files.forEach(function(file) {
-      var src = james.read(file).pipe(coffee.createStream());
+      var src = james.read(file).pipe(coffee());
       src.pipe(dist);
-      src.pipe(uglify.createStream()).pipe(min);
+      src.pipe(uglify({unsafe: true})).pipe(min);
     });
   });
 });
@@ -27,7 +27,7 @@ james.task('build', function() {
 james.task('watch', function() {
   james.watch('test/**/*.coffee', function(event, file) {
     james.read(file)
-      .pipe(coffee.createStream())
+      .pipe(coffee({bare: true}))
       .pipe(james.write(file.replace('.coffee', '.js')));
   });
 });
