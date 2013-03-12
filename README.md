@@ -57,7 +57,7 @@ var james  = require('james'),
     coffee = require('coffee-script');
 
 coffee.createStream = function() {
-  james.createStream(function(file, callback) {
+  return james.createStream(function(file, callback) {
 
     // Process the input and call the callback with the result.
     callback(coffee.compile(file));
