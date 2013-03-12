@@ -157,7 +157,7 @@ describe('james', function(){
       dest.on('finish', function(){
         assert.equal(dest.read(), "Hello World!");
         done();
-      })
+      });
     });
   });
 });
