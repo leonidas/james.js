@@ -1,9 +1,10 @@
-var gaze    = require('gaze'),
-    fs      = require('fs'),
-    path    = require('path'),
-    mkdirp  = require('mkdirp'),
-    glob    = require('glob'),
-    Q       = require('q');
+var gaze   = require('gaze'),
+    fs     = require('fs'),
+    path   = require('path'),
+    mkdirp = require('mkdirp'),
+    glob   = require('glob'),
+    Q      = require('q'),
+    stream = require('readable-stream'), // For node.js 0.8.x support;
 
 tasks = {};
 
@@ -52,3 +53,25 @@ exports.write = function(file) {
   return fs.createWriteStream(file);
 }
 
+_transform = function(chunk, encoding, callback) {
+  this._file += chunk;
+  callback();
+}
+
+_flush = function(op) {
+  return function(callback) {
+    stream = this;
+    op(this._file, function(result) {
+      stream.push(result);
+      callback();
+    });
+  }
+}
+
+exports.createStream = function(op) {
+  stream = new stream.Transform();
+  stream._file      = '';
+  stream._transform = _transform;
+  stream._flush     = _flush(op);
+  return stream;
+}

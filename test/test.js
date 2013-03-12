@@ -136,4 +136,28 @@ describe('james', function(){
       james.run('default');
     });
   });
+
+  describe('#createStream', function(){
+    it('should return a stream for the transformation operation', function(done){
+      var src  = new stream.PassThrough(),
+          dest = new stream.PassThrough(),
+          operation,
+          transform;
+
+      operation = function(file, callback) {
+        callback(file + " World!");
+      };
+
+      transform = james.createStream(operation);
+
+      src.pipe(transform).pipe(dest);
+      src.write("Hello");
+      src.end();
+
+      dest.on('finish', function(){
+        assert.equal(dest.read(), "Hello World!");
+        done();
+      })
+    });
+  });
 });
