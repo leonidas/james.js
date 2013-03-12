@@ -63,5 +63,7 @@ coffee.createStream = function() {
   });
 };
 
-james.read('./hello.coffee').pipe(coffee.createStream()).pipe(process.stdout);
+james.read('./hello.coffee')
+  .transform(coffee.createStream)
+  .write(process.stdout);
 ```
