@@ -60,18 +60,18 @@ _transform = function(chunk, encoding, callback) {
 
 _flush = function(op) {
   return function(callback) {
-    stream = this;
+    var self = this;
     op(this._file, function(result) {
-      stream.push(result);
+      self.push(result);
       callback();
     });
   }
 }
 
 exports.createStream = function(op) {
-  stream = new stream.Transform();
-  stream._file      = '';
-  stream._transform = _transform;
-  stream._flush     = _flush(op);
-  return stream;
+  var s = new stream.Transform();
+  s._file      = '';
+  s._transform = _transform;
+  s._flush     = _flush(op);
+  return s;
 }
