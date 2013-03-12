@@ -7,8 +7,8 @@ James.js is a composable build tool which prefers code over configuration.
 ```javascript
 // Jamesfile.js
 var james  = require('james'),
-    coffee = require('james-coffee').createStream,
-    uglify = require('james-uglify').createStream;
+    coffee = require('james-coffee'),
+    uglify = require('james-uglify');
 
 james.task('build', function() {
   var dist = james.write('dist/my-lib.js'),
