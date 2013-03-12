@@ -17,9 +17,9 @@ james.task('build', function() {
   james.list('src/**/*.coffee', function(files) {
 
     files.forEach(function(file) {
-      var src = james.read(file).pipe(coffee());
+      var src = james.read(file).pipe(coffee.createStream());
       src.pipe(dist);
-      src.pipe(uglify()).pipe(min);
+      src.pipe(uglify.createStream()).pipe(min);
     });
   });
 });
@@ -27,7 +27,7 @@ james.task('build', function() {
 james.task('watch', function() {
   james.watch('test/**/*.coffee', function(event, file) {
     james.read(file)
-      .pipe(coffee())
+      .pipe(coffee.createStream())
       .pipe(james.write(file.replace('.coffee', '.js')));
   });
 });
@@ -54,8 +54,7 @@ or use `james.createStream` helper.
 ```javascript
 // james-coffee/index.js
 var james  = require('james'),
-    coffee = require('coffee-script'),
-    coffeeStream;
+    coffee = require('coffee-script');
 
 coffee.createStream = function() {
   james.createStream(function(file, callback) {
@@ -66,5 +65,4 @@ coffee.createStream = function() {
 };
 
 james.read('./hello.coffee').pipe(coffee.createStream()).pipe(process.stdout);
-
 ```
