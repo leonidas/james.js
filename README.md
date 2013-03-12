@@ -48,7 +48,7 @@ By default, james runs `default` task. Specific tasks can be run by listing them
 ## Transformations
 
 James uses node.js streams for transformations.
-Create a [Transform stream](http://nodejs.org/api/stream.html#stream_transform_transform_chunk_encoding_callback),
+Create a [Transform stream](http://nodejs.org/api/stream.html#stream_class_stream_transform),
 or use `james.createStream` helper.
 
 ```javascript
