@@ -19,14 +19,17 @@ if (fs.existsSync('./Jamesfile.js')) {
   process.exit(1);
 }
 
+function runOnChildProcess() {
+  console.log('Loading Jamesfile');
+  if ( runner ) {
+    runner.kill();
+  }
+  runner = cp.fork(__dirname + '/../lib/runner', process.argv.slice(2));
+}
+
 if (process.argv.indexOf('watch') > -1) {
-  james.watch(jamesfile).toProperty(james.files(jamesfile)).onValue(function() {
-    console.log('Loading Jamesfile');
-    if ( runner ) {
-      runner.kill();
-    }
-    runner = cp.fork(__dirname + '/../lib/runner', process.argv.slice(2));
-  });
+  runOnChildProcess();
+  james.watch(jamesfile, runOnChildProcess);
 
 } else {
   console.log('Loading Jamesfile');
