@@ -34,11 +34,8 @@ describe('james', function(){
       }
     });
 
-    it('should return matching files for glob a glob pattern', function(done){
-      james.list('test/fixtures/**/*.js', function(res) {
-        assert.deepEqual(res, files);
-        done();
-      });
+    it('should return matching files for glob a glob pattern', function(){
+        assert.deepEqual(james.list('test/fixtures/**/*.js'), files);
     });
   });
 

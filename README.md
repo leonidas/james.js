@@ -12,14 +12,12 @@ var james  = require('james'),
 
 james.task('build', function() {
 
-  james.list('src/**/*.coffee', function(files) {
-    files.forEach(function(file) {
+  james.list('src/**/*.coffee').forEach(function(file) {
 
-      james.read(file)
-        .transform(coffee({bare: true}))
-        .transform(uglify)
-        .write(file.replace('src', 'dist').replace('.coffee', '.min.js'));
-    });
+    james.read(file)
+      .transform(coffee({bare: true}))
+      .transform(uglify)
+      .write(file.replace('src', 'dist').replace('.coffee', '.min.js'));
   });
 });
 
@@ -46,9 +44,9 @@ By default, james runs `default` task. Specific tasks can be run by listing them
 
 ## Transformations
 
-Existing transformations are listed in the [wiki](https://github.com/leonidas/james.js/wiki).
+Existing transformations are listed in the [wiki](https://github.com/leonidas/james.js/wiki). Please add your transformations, too!
 
-###
+### Creating new transformations
 
 James uses node.js streams for transformations.
 Create a [Transform stream](http://nodejs.org/api/stream.html#stream_class_stream_transform),

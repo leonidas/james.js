@@ -28,8 +28,8 @@ exports.run = function(name) {
   }
 }
 
-exports.list = function(pattern, cb) {
-  Q.nfcall(glob, pattern).then(cb).done();
+exports.list = function(pattern) {
+  return glob.sync(pattern);
 }
 
 exports.watch = function(pattern, cb) {
