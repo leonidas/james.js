@@ -4,7 +4,7 @@
 
 var fs    = require('fs'),
     cp    = require('child_process'),
-    james = require('../index.js'),
+    james = require(process.cwd() + '/node_modules/james/index.js'),
     jamesfile,
     runner;
 
