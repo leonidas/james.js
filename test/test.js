@@ -3,9 +3,7 @@ var assert = require('assert'),
     stream = require('readable-stream'),
     path   = require('path'),
     mkdirp = require('mkdirp'),
-    james  = require('../index'),
-    util   = require('util'),
-    Q      = require('q');
+    james  = require('../index');
 
 describe('james', function(){
 
