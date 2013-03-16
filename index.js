@@ -35,8 +35,11 @@ exports.run = function(name) {
   }
 };
 
-exports.list = function(pattern) {
-  return glob.sync(pattern);
+exports.list = function() {
+  return _.chain(arguments)
+    .map(function(p){ return glob.sync(p); })
+    .flatten()
+    .value();
 };
 
 exports.watch = function(pattern, cb) {
