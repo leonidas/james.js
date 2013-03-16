@@ -59,17 +59,11 @@ exports.read = function(stream) {
 }
 
 exports.write = function(filename) {
-  // Write first to pass through buffer in order to avoid partial files written
-  // in case of errors.
-  buf = new stream.PassThrough();
-
-  buf.on('finish', function() {
-    mkdirp.sync(path.dirname(filename));
-    file = fs.createWriteStream(filename);
-    this.pipe(file);
-    file.on('close', function() { console.log('Wrote file '.green + filename.green) });
-  });
-  return buf;
+  var file;
+  mkdirp.sync(path.dirname(filename));
+  file = fs.createWriteStream(filename);
+  file.on('close', function() { console.log('Wrote file '.green + filename.green) });
+  return file;
 }
 
 _transform = function(chunk, encoding, callback) {
