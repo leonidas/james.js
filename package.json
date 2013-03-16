@@ -4,7 +4,7 @@
   "description": "James is a composable build tool which prefers code over configuration.",
   "main": "index.js",
   "scripts": {
-    "test": "jshint **/*.js && mocha"
+    "test": "jshint *.js **/*.js && mocha"
   },
   "repository": "",
   "keywords": [

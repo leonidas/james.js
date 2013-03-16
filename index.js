@@ -12,7 +12,7 @@ var gaze     = require('gaze'),
 
 exports.task = function(name, task) {
   tasks[name] = task;
-}
+};
 
 exports.run = function(name) {
   var task = tasks[name];
@@ -26,18 +26,18 @@ exports.run = function(name) {
     task();
   }
   else {
-    console.error(('Error: Task "' + name + '" not found in Jamesfile.').red)
+    console.error(('Error: Task "' + name + '" not found in Jamesfile.').red);
     console.log('Available tasks: ');
     tasks = _.keys(tasks);
     for (var i = 0; i < tasks.length; i++) {
       console.log('"' + tasks[i] + '"');
-    };
+    }
   }
-}
+};
 
 exports.list = function(pattern) {
   return glob.sync(pattern);
-}
+};
 
 exports.watch = function(pattern, cb) {
   Q.nfcall(gaze, pattern)
@@ -49,29 +49,55 @@ exports.watch = function(pattern, cb) {
     });
   })
   .done();
-}
+};
 
 exports.read = function(stream) {
   if (typeof stream === 'string') {
     stream = fs.createReadStream(stream);
   }
   return new Pipeline(stream);
-}
+};
 
 exports.write = function(filename) {
-  var file;
+  var deferred = Q.defer(),
+      file;
   mkdirp.sync(path.dirname(filename));
   file = fs.createWriteStream(filename);
-  file.on('close', function() { console.log('Wrote file '.green + filename.green) });
+  file.on('error', function(err) {
+    deferred.reject(err);
+  });
+  file.on('close', function() {
+    console.log('Wrote file '.green + filename.green);
+    deferred.resolve(filename);
+  });
+  file.promise = deferred.promise;
   return file;
+};
+
+function toPromise(op) {
+  if (op.promise) {
+    return op.promise;
+  }
+  else {
+    return Q.when(op);
+  }
 }
 
-_transform = function(chunk, encoding, callback) {
+exports.wait = function(operation) {
+  if (Array.isArray(operation)) {
+    return Q.all(operation.map(toPromise));
+  }
+  else {
+    return toPromise(operation);
+  }
+};
+
+function transform(chunk, encoding, callback) {
   this._content += chunk;
   callback();
 }
 
-_flush = function(f) {
+function flush(f) {
   return function(callback) {
     var self = this;
     try {
@@ -83,17 +109,17 @@ _flush = function(f) {
     } catch (err) {
       callback(err);
     }
-  }
+  };
 }
 
 exports.createStream = function(f) {
   var s = new stream.Transform();
   s._content   = '';
-  s._transform = _transform;
-  s._flush     = _flush(f);
+  s._transform = transform;
+  s._flush     = flush(f);
   s.on('error', function(err){
     console.error("ERROR:".red, err.message.red);
     process.exit(1);
   });
   return s;
-}
+};
