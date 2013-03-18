@@ -41,6 +41,7 @@ james.task('default', ['build', 'watch']);
 `james.watch(glob, callback)` Watch files matching the `glob`.
 
 `james.dest(filename)` Returns a [Writable stream](http://nodejs.org/api/stream.html#stream_class_stream_writable).
+Handy if you want to concatenate files to one destination.
 
 `james.read(filename)` Read a file. Returns a `Pipeline` object. Use `Pipeline.stream`, if you need an access
 to the underlying ReadableStream.
