@@ -115,7 +115,7 @@ function flush(f) {
   };
 }
 
-exports.createStream = function(f) {
+exports.createTransformation = function(f) {
   var s = new stream.Transform();
   s._content   = '';
   s._transform = transform;
@@ -126,3 +126,7 @@ exports.createStream = function(f) {
   });
   return s;
 };
+
+// For backward compatibility
+exports.createStream = exports.createTransformation;
+

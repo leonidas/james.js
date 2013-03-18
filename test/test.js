@@ -136,7 +136,7 @@ describe('james', function(){
     });
   });
 
-  describe('#createStream', function(){
+  describe('#createTransformation', function(){
     it('should return a stream for the transformation operation', function(done){
       var src  = new stream.PassThrough(),
           dest = new stream.PassThrough(),
@@ -147,7 +147,7 @@ describe('james', function(){
         callback(file + " World!");
       };
 
-      transform = james.createStream(operation);
+      transform = james.createTransformation(operation);
 
       src.pipe(transform).pipe(dest);
       src.write("Hello");
