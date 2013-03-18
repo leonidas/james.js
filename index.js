@@ -61,7 +61,7 @@ exports.read = function(stream) {
   return new Pipeline(stream);
 };
 
-exports.write = function(filename) {
+exports.dest = function(filename) {
   var deferred = Q.defer(),
       file;
   mkdirp.sync(path.dirname(filename));

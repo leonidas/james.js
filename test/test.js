@@ -104,7 +104,7 @@ describe('james', function(){
 
     it('should return a write stream for the file', function(done){
       var src  = new stream.PassThrough(),
-          dest = james.write(file.name);
+          dest = james.dest(file.name);
 
       src.pipe(dest);
       src.write(file.content);
