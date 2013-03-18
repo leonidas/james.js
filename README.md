@@ -41,7 +41,7 @@ james.task('default', ['build', 'watch']);
 `james.watch(glob, callback)` Watch files matching the `glob`.
 
 `james.dest(filename)` Returns a [Writable stream](http://nodejs.org/api/stream.html#stream_class_stream_writable).
-Handy if you want to concatenate files to one destination.
+Handy if you want to concatenate files to a single destination.
 
 `james.read(filename)` Read a file. Returns a `Pipeline` object. Use `Pipeline.stream`, if you need an access
 to the underlying ReadableStream.
@@ -51,14 +51,11 @@ write operations, e.g.,
 
 ```javascript
 js = james.list('src/**/*.coffee').map(function(file) {
-  james.read(file).transform(coffee).write(file.replace(/\\.coffee/, '.js'));
+  james.read(file).transform(coffee).write(file.replace(/\.coffee/, '.js'));
 });
 
-james.wait(js, function(js) {
-
-  // It's now safe to read js files, e.g., with browserify or r.js
-  console.log(js); // prints the filenames of the written files.
-})
+// After james.wait, it's safe to read files, e.g., with browserify or r.js
+james.wait(js, function(js) { js.forEach(function(filename){ james.read(filename).write(process.stdout) }) });
 ```
 
 `Pipeline.transform(transformation)` Transform the underlying stream with a given `transformation`. `transformation` can be
