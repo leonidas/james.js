@@ -120,10 +120,6 @@ exports.createTransformation = function(f) {
   s._content   = '';
   s._transform = transform;
   s._flush     = flush(f);
-  s.on('error', function(err){
-    console.error("ERROR:".red, err.message.red);
-    process.exit(1);
-  });
   return s;
 };
 

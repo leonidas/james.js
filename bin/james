@@ -25,6 +25,7 @@ function runOnChildProcess() {
     runner.kill();
   }
   runner = cp.fork(__dirname + '/../lib/runner', process.argv.slice(2));
+  runner.on('exit', runOnChildProcess);
 }
 
 if (process.argv.indexOf('watch') > -1) {
