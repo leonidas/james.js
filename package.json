@@ -1,14 +1,14 @@
 {
   "name": "james",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "James is a composable build tool which prefers code over configuration.",
   "main": "index.js",
   "scripts": {
     "test": "jshint *.js **/*.js && mocha"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/leonidas/james.js.git"
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/leonidas/james.js.git"
   },
   "keywords": [
     "grunt",
