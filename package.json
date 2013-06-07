@@ -6,7 +6,10 @@
   "scripts": {
     "test": "jshint *.js **/*.js && mocha"
   },
-  "repository": "",
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/leonidas/james.js.git"
+  },
   "keywords": [
     "grunt",
     "james",
