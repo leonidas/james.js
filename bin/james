@@ -9,28 +9,25 @@ var fs    = require('fs'),
     runner;
 
 if (fs.existsSync('./Jamesfile.js')) {
-  jamesfile = './Jamesfile.js'
+  jamesfile = './Jamesfile.js';
 
 } else if (fs.existsSync('./Jamesfile.coffee')) {
-  jamesfile = './Jamesfile.coffee'
+  jamesfile = './Jamesfile.coffee';
 
 } else {
-  console.log("Error: Unable to find Jamesfile.")
+  console.log("Error: Unable to find Jamesfile.");
   process.exit(1);
 }
 
 function runOnChildProcess() {
   console.log('Loading Jamesfile');
-  if ( runner ) {
-    runner.kill();
-  }
   runner = cp.fork(__dirname + '/../lib/runner', process.argv.slice(2));
   runner.on('exit', runOnChildProcess);
 }
 
 if (process.argv.indexOf('watch') > -1) {
   runOnChildProcess();
-  james.watch(jamesfile, runOnChildProcess);
+  james.watch(jamesfile, function(){ runner.kill(); });
 
 } else {
   console.log('Loading Jamesfile');
