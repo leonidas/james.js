@@ -5,6 +5,7 @@
 var fs    = require('fs'),
     cp    = require('child_process'),
     james = require(process.cwd() + '/node_modules/james/index.js'),
+    tasks = process.argv.slice(2),
     jamesfile,
     runner;
 
@@ -21,12 +22,16 @@ if (fs.existsSync('./Jamesfile.js')) {
 
 function runOnChildProcess() {
   console.log('Loading Jamesfile');
-  runner = cp.fork(__dirname + '/../lib/runner', process.argv.slice(2));
+  runner = cp.fork(__dirname + '/../lib/runner', tasks);
   runner.on('exit', runOnChildProcess);
 }
 
 if (process.argv.indexOf('watch') > -1) {
+  // Run 'default' task on first run, if 'watch' is set
+  tasks = ['default'].concat(tasks);
   runOnChildProcess();
+  tasks = tasks.slice(1);
+
   james.watch(jamesfile, function(){ runner.kill(); });
 
 } else {
