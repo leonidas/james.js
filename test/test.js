@@ -62,6 +62,41 @@ describe('james', function(){
       },
         1000);
     });
+
+    it('should run the named task if the callback is a string', function(done){
+      james.task('foo', function(){
+        done();
+      });
+
+      james.watch('test/**/*.js', 'foo');
+
+      setTimeout(function(){
+        var now = new Date();
+        fs.utimesSync(file, now, now);
+      },
+        1000);
+    });
+
+    it('should run the listed tasks if the callback is an array', function(done){
+      var foo = false;
+
+      james.task('foo', function(){
+        foo = true;
+      });
+
+      james.task('bar', function(){
+        assert(foo);
+        done();
+      });
+
+      james.watch('test/**/*.js', ['foo', 'bar']);
+
+      setTimeout(function(){
+        var now = new Date();
+        fs.utimesSync(file, now, now);
+      },
+        1000);
+    });
   });
 
   describe('#read', function(){
