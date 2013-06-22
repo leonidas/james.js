@@ -43,6 +43,23 @@ exports.list = function() {
 };
 
 exports.watch = function(pattern, cb) {
+  var tasks;
+
+  if (typeof cb === 'string') {
+    tasks = cb;
+    cb = function() {
+      exports.run(tasks);
+    };
+  }
+  else if (Array.isArray(cb)) {
+    tasks = cb;
+    cb = function() {
+      tasks.forEach(function(task) {
+        exports.run(task);
+      });
+    };
+  }
+
   Q.nfcall(gaze, pattern)
   .then(function(watcher) {
     watcher.on('all', function(event, file) {
