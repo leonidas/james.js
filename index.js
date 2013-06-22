@@ -5,7 +5,7 @@ var gaze     = require('gaze'),
     glob     = require('glob'),
     Q        = require('q'),
     stream   = require('readable-stream'), // For node.js 0.8.x support
-    colors   = require('colors'),
+    logger   = require('./lib/logger'),
     Pipeline = require('./lib/pipeline'),
     _        = require('underscore'),
     tasks    = {};
@@ -22,15 +22,15 @@ exports.run = function(name) {
     });
   }
   else if (typeof task === 'function') {
-    console.log('Executing task "' + name + '"');
+    logger.info('Executing task "' + name + '"');
     task();
   }
   else {
-    console.error(('Error: Task "' + name + '" not found in Jamesfile.').red);
-    console.log('Available tasks: ');
+    logger.error('Task "' + name + '" not found in Jamesfile.');
+    logger.info('Available tasks: ');
     tasks = _.keys(tasks);
     for (var i = 0; i < tasks.length; i++) {
-      console.log('"' + tasks[i] + '"');
+      logger.info('"' + tasks[i] + '"');
     }
   }
 };
@@ -70,7 +70,7 @@ exports.dest = function(filename) {
     deferred.reject(err);
   });
   file.on('close', function() {
-    console.log('Wrote file '.green + filename.green);
+    logger.info('Wrote file '+ filename);
     deferred.resolve(filename);
   });
   file.promise = deferred.promise;

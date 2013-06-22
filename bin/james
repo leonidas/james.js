@@ -2,10 +2,11 @@
 
 'use strict';
 
-var fs    = require('fs'),
-    cp    = require('child_process'),
-    james = require(process.cwd() + '/node_modules/james/index.js'),
-    tasks = process.argv.slice(2),
+var fs     = require('fs'),
+    cp     = require('child_process'),
+    logger = require('../lib/logger'),
+    james  = require(process.cwd() + '/node_modules/james/index.js'),
+    tasks  = process.argv.slice(2),
     jamesfile,
     runner;
 
@@ -16,12 +17,12 @@ if (fs.existsSync('./Jamesfile.js')) {
   jamesfile = './Jamesfile.coffee';
 
 } else {
-  console.log("Error: Unable to find Jamesfile.");
+  logger.error("Unable to find Jamesfile.");
   process.exit(1);
 }
 
 function runOnChildProcess() {
-  console.log('Loading Jamesfile');
+  logger.info('Loading Jamesfile');
   runner = cp.fork(__dirname + '/../lib/runner', tasks);
   runner.on('exit', runOnChildProcess);
 }
@@ -35,6 +36,6 @@ if (process.argv.indexOf('watch') > -1) {
   james.watch(jamesfile, function(){ runner.kill(); });
 
 } else {
-  console.log('Loading Jamesfile');
+  logger.info('Loading Jamesfile');
   runner = require(__dirname + '/../lib/runner');
 }
