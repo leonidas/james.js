@@ -25,7 +25,7 @@ james.task('watch', function() {
   james.watch('test/**/*.coffee', function(event, file) {
     james.read(file)
       .transform(coffee({bare: true}))
-      .write(file.replace('.coffee', '.js')));
+      .write(file.replace('.coffee', '.js'));
   });
 });
 
