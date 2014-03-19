@@ -17,7 +17,7 @@ james.task('build', function() {
     james.read(file)
       .transform(coffee({bare: true}))
       .transform(uglify)
-      .write(file.replace('src', 'dist').replace('.coffee', '.min.js'));
+      .write(file.replace('src/', 'dist/').replace(/\.coffee$/i, '.min.js'));
   });
 });
 
@@ -25,7 +25,7 @@ james.task('watch', function() {
   james.watch('test/**/*.coffee', function(event, file) {
     james.read(file)
       .transform(coffee({bare: true}))
-      .write(file.replace('.coffee', '.js'));
+      .write(file.replace(/\.coffee$/i, '.js'));
   });
 });
 
@@ -51,7 +51,7 @@ write operations, e.g.,
 
 ```javascript
 js = james.list('src/**/*.coffee').map(function(file) {
-  james.read(file).transform(coffee).write(file.replace(/\.coffee/, '.js'));
+  james.read(file).transform(coffee).write(file.replace(/\.coffee$/, '.js'));
 });
 
 // After james.wait, it's safe to read files, e.g., with browserify or r.js
