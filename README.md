@@ -1,4 +1,8 @@
-# Synopsis
+# Deprecated
+
+Please use [gulp](https://github.com/gulpjs/gulp) instead.
+
+## Synopsis
 
 [![Build Status](https://travis-ci.org/leonidas/james.js.png?branch=master)](https://travis-ci.org/leonidas/james.js)
 
