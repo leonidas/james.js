@@ -25,7 +25,7 @@
     "glob": "~3.1.21",
     "gaze": "~0.3.3",
     "mkdirp": "~0.3.5",
-    "coffee-script": "~1.6.1",
+    "coffee-script": "~1.9.3",
     "q": "~0.9.1",
     "readable-stream": "~1.0.0",
     "colors": "~0.6.0-1",
